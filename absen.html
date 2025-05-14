@@ -12,11 +12,30 @@
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(function (pos) {
             const lokasi = pos.coords.latitude + "," + pos.coords.longitude;
-            const url = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzKW3sqY3iA28F5iwaAfONUzmk102556WPGLJ7DNTiCJEOzGvqbXF1009S7qfkiateg/exec/exec" +
+            const url = "https://script.google.com/macros/s/AKfycbzKW3sqY3iA28F5iwaAfONUzmk102556WPGLJ7DNTiCJEOzGvqbXF1009S7qfkiateg/exec" +
                         "?nama=" + encodeURIComponent(nama) +
                         "&barcode=" + encodeURIComponent(barcode) +
                         "&lokasi=" + encodeURIComponent(lokasi);
-            window.location.href = url;
+
+            // Tampilkan spinner atau pesan loading
+            document.body.innerHTML = "<h3>⏳ Memproses...</h3>";
+
+            // Kirim data ke Google Apps Script dengan fetch()
+            fetch(url)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Gagal mengirim data');
+                }
+                return response.json();
+              })
+              .then(data => {
+                // Setelah data berhasil dikirim
+                document.body.innerHTML = "<h3>✅ Absen berhasil dikirim!</h3>";
+              })
+              .catch(error => {
+                // Jika terjadi error saat mengirim data
+                document.body.innerHTML = "<h3>❌ Gagal mengirim absen. Coba lagi.</h3>";
+              });
           }, function (err) {
             document.body.innerHTML = "<p>❌ Gagal ambil lokasi: " + err.message + "</p>";
           });
