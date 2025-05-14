@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Absen</title>
+  <script>
+    window.onload = function () {
+      const urlParams = new URLSearchParams(window.location.search);
+      const nama = urlParams.get('nama');
+      const barcode = urlParams.get('barcode');
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          const lokasi = position.coords.latitude + "," + position.coords.longitude;
+          const url = "https://script.google.com/macros/s/AKfycbzKW3sqY3iA28F5iwaAfONUzmk102556WPGLJ7DNTiCJEOzGvqbXF1009S7qfkiateg/exec"
+                      + "?nama=" + encodeURIComponent(nama)
+                      + "&barcode=" + encodeURIComponent(barcode)
+                      + "&lokasi=" + encodeURIComponent(lokasi);
+          window.location.href = url;
+        }, function (error) {
+          alert("Gagal mengakses lokasi.");
+        });
+      } else {
+        alert("Browser tidak mendukung GPS.");
+      }
+    };
+  </script>
+</head>
+<body>
+  <h2>Memproses absensi...</h2>
+</body>
+</html>
