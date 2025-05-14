@@ -3,13 +3,27 @@
   <head>
     <title>Absen</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      /* Tambahkan gaya untuk spinner atau indikator loading */
+      #loading {
+        display: none;
+        font-size: 18px;
+      }
+    </style>
     <script>
       window.onload = function () {
         const params = new URLSearchParams(window.location.search);
         const nama = params.get('nama') || "N/A";
         const barcode = params.get('barcode') || "N/A";
 
+        const loadingMessage = document.getElementById("loading");
+        const statusMessage = document.getElementById("status");
+
         if (navigator.geolocation) {
+          // Tampilkan pesan loading
+          loadingMessage.style.display = "block";
+          statusMessage.innerHTML = "📍 Mengambil lokasi...";
+
           navigator.geolocation.getCurrentPosition(function (pos) {
             const lokasi = pos.coords.latitude + "," + pos.coords.longitude;
             const url = "https://script.google.com/macros/s/AKfycbzKW3sqY3iA28F5iwaAfONUzmk102556WPGLJ7DNTiCJEOzGvqbXF1009S7qfkiateg/exec" +
@@ -17,8 +31,8 @@
                         "&barcode=" + encodeURIComponent(barcode) +
                         "&lokasi=" + encodeURIComponent(lokasi);
 
-            // Tampilkan spinner atau pesan loading
-            document.body.innerHTML = "<h3>⏳ Memproses...</h3>";
+            // Tampilkan pesan loading selama pengiriman
+            statusMessage.innerHTML = "⏳ Memproses...";
 
             // Kirim data ke Google Apps Script dengan fetch()
             fetch(url)
@@ -26,26 +40,30 @@
                 if (!response.ok) {
                   throw new Error('Gagal mengirim data');
                 }
-                return response.json();
+                return response.text(); // Menggunakan text() untuk respons dari Google Apps Script
               })
               .then(data => {
                 // Setelah data berhasil dikirim
-                document.body.innerHTML = "<h3>✅ Absen berhasil dikirim!</h3>";
+                loadingMessage.style.display = "none";
+                statusMessage.innerHTML = "<h3>✅ Absen berhasil dikirim!</h3>";
               })
-             .catch(error => {
+              .catch(error => {
                 // Jika terjadi error saat mengirim data
-               document.body.innerHTML = "<h3>❌ Gagal mengirim absen. Coba lagi.</h3>";
-             });
+                loadingMessage.style.display = "none";
+                statusMessage.innerHTML = "<h3>❌ Gagal mengirim absen. Coba lagi.</h3>";
+              });
           }, function (err) {
-            document.body.innerHTML = "<p>❌ Gagal ambil lokasi: " + err.message + "</p>";
+            loadingMessage.style.display = "none";
+            statusMessage.innerHTML = "<p>❌ Gagal ambil lokasi: " + err.message + "</p>";
           });
         } else {
-          document.body.innerHTML = "<p>❌ Browser tidak mendukung lokasi.</p>";
+          statusMessage.innerHTML = "<p>❌ Browser tidak mendukung lokasi.</p>";
         }
       };
     </script>
   </head>
   <body>
-    <h3>📍 Mengambil lokasi dan mengirim absen...</h3>
+    <h3 id="status">📍 Mengambil lokasi dan mengirim absen...</h3>
+    <div id="loading">⏳ Mohon tunggu, proses sedang berlangsung...</div>
   </body>
 </html>
