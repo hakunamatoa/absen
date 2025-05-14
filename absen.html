@@ -1,97 +1,32 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Absensi Otomatis</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #f0f8ff, #e0f7fa);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      color: #333;
-      text-align: center;
-    }
+<html>
+  <head>
+    <title>Absen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+      window.onload = function () {
+        const params = new URLSearchParams(window.location.search);
+        const nama = params.get('nama') || "N/A";
+        const barcode = params.get('barcode') || "N/A";
 
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 16px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-      max-width: 400px;
-      width: 90%;
-    }
-
-    h1 {
-      margin-bottom: 16px;
-      font-size: 24px;
-      color: #00796b;
-    }
-
-    .status {
-      margin-top: 20px;
-      font-size: 16px;
-    }
-
-    .spinner {
-      margin-top: 15px;
-      width: 32px;
-      height: 32px;
-      border: 4px solid #ccc;
-      border-top: 4px solid #00796b;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Memproses Absensi...</h1>
-    <div class="spinner"></div>
-    <div class="status" id="status">Mengambil lokasi dan mengirim data...</div>
-  </div>
-
-  <script>
-    window.onload = function () {
-      const params = new URLSearchParams(window.location.search);
-      const nama = params.get('nama');
-      const barcode = params.get('barcode');
-
-      if (!nama || !barcode) {
-        document.getElementById("status").innerText = "❌ Nama atau barcode tidak ditemukan di URL.";
-        document.querySelector('.spinner').style.display = "none";
-        return;
-      }
-
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-          const lokasi = position.coords.latitude + "," + position.coords.longitude;
-          const url = "https://script.google.com/macros/s/PASTE_WEB_APP_URL_KAMU/exec"
-                    + "?nama=" + encodeURIComponent(nama)
-                    + "&barcode=" + encodeURIComponent(barcode)
-                    + "&lokasi=" + encodeURIComponent(lokasi);
-          document.getElementById("status").innerText = "📡 Mengirim data ke server...";
-          setTimeout(() => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function (pos) {
+            const lokasi = pos.coords.latitude + "," + pos.coords.longitude;
+            const url = "https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzKW3sqY3iA28F5iwaAfONUzmk102556WPGLJ7DNTiCJEOzGvqbXF1009S7qfkiateg/exec/exec" +
+                        "?nama=" + encodeURIComponent(nama) +
+                        "&barcode=" + encodeURIComponent(barcode) +
+                        "&lokasi=" + encodeURIComponent(lokasi);
             window.location.href = url;
-          }, 1000);
-        }, function (error) {
-          document.getElementById("status").innerText = "❌ Gagal mengakses lokasi: " + error.message;
-          document.querySelector('.spinner').style.display = "none";
-        });
-      } else {
-        document.getElementById("status").innerText = "❌ Device tidak mendukung geolokasi.";
-        document.querySelector('.spinner').style.display = "none";
-      }
-    };
-  </script>
-</body>
+          }, function (err) {
+            document.body.innerHTML = "<p>❌ Gagal ambil lokasi: " + err.message + "</p>";
+          });
+        } else {
+          document.body.innerHTML = "<p>❌ Browser tidak mendukung lokasi.</p>";
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <h3>📍 Mengambil lokasi dan mengirim absen...</h3>
+  </body>
 </html>
