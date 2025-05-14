@@ -32,9 +32,9 @@
                 // Setelah data berhasil dikirim
                 document.body.innerHTML = "<h3>✅ Absen berhasil dikirim!</h3>";
               })
-           //   .catch(error => {
+             .catch(error => {
                 // Jika terjadi error saat mengirim data
-            //    document.body.innerHTML = "<h3>❌ Gagal mengirim absen. Coba lagi.</h3>";
+               document.body.innerHTML = "<h3>❌ Gagal mengirim absen. Coba lagi.</h3>";
           //    });
           }, function (err) {
             document.body.innerHTML = "<p>❌ Gagal ambil lokasi: " + err.message + "</p>";
