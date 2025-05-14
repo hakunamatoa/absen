@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Absen</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+      window.onload = function () {
+        const params = new URLSearchParams(window.location.search);
+        const nama = params.get('nama') || "N/A";
+        const barcode = params.get('barcode') || "N/A";
+
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function (pos) {
+            const lokasi = pos.coords.latitude + "," + pos.coords.longitude;
+            const url = "https://script.google.com/macros/s/AKfycbzKW3sqY3iA28F5iwaAfONUzmk102556WPGLJ7DNTiCJEOzGvqbXF1009S7qfkiateg/exec" +
+                        "?nama=" + encodeURIComponent(nama) +
+                        "&barcode=" + encodeURIComponent(barcode) +
+                        "&lokasi=" + encodeURIComponent(lokasi);
+            window.location.href = url;
+          }, function (err) {
+            document.body.innerHTML = "<p>❌ Gagal ambil lokasi: " + err.message + "</p>";
+          });
+        } else {
+          document.body.innerHTML = "<p>❌ Browser tidak mendukung lokasi.</p>";
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <h3>📍 Mengambil lokasi dan mengirim absen...</h3>
+  </body>
+</html>
