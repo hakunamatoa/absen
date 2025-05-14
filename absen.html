@@ -1,27 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Absen</title>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Absen</title>
   <style>
-    #loading { display: none; font-size: 18px; }
-    h3 { font-family: sans-serif; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 30px;
+    }
+    h3 {
+      font-size: 24px;
+    }
+    #loading {
+      display: none;
+      font-size: 18px;
+    }
+    #status {
+      margin-bottom: 20px;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3; /* Light gray */
+      border-top: 4px solid #3498db; /* Blue */
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <h3 id="status">📍 Mengambil lokasi dan mengirim absen...</h3>
-  <div id="loading">⏳ Mohon tunggu, proses sedang berlangsung...</div>
+  <div id="loading" class="spinner"></div>
+  <div id="error-message" style="display: none; color: red; font-size: 18px;"></div>
 
   <script>
     window.onload = function () {
-      const params  = new URLSearchParams(window.location.search);
-      const nama    = params.get('nama')    || "N/A";
+      const params = new URLSearchParams(window.location.search);
+      const nama = params.get('nama') || "N/A";
       const barcode = params.get('barcode') || "N/A";
-      const statusEl  = document.getElementById("status");
+      const statusEl = document.getElementById("status");
       const loadingEl = document.getElementById("loading");
+      const errorMessageEl = document.getElementById("error-message");
 
       if (!navigator.geolocation) {
         statusEl.innerHTML = "❌ Browser tidak mendukung lokasi.";
+        errorMessageEl.innerHTML = "Pastikan kamu menggunakan browser yang mendukung geolocation (seperti Chrome).";
+        errorMessageEl.style.display = "block";
         return;
       }
 
@@ -31,9 +62,9 @@
       navigator.geolocation.getCurrentPosition(pos => {
         const lokasi = `${pos.coords.latitude},${pos.coords.longitude}`;
         const url = "https://script.google.com/macros/s/AKfycbwRaiGz_qREOuwsc8LzQtiKP7ANRrXDnI0i41Dblaef7TvTvCAOICtxeyCUemzmzds5/exec"
-                   + "?nama="    + encodeURIComponent(nama)
+                   + "?nama=" + encodeURIComponent(nama)
                    + "&barcode=" + encodeURIComponent(barcode)
-                   + "&lokasi="  + encodeURIComponent(lokasi);
+                   + "&lokasi=" + encodeURIComponent(lokasi);
 
         statusEl.innerHTML = "⏳ Memproses...";
         fetch(url)
