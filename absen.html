@@ -6,7 +6,6 @@
   <title>Absensi (nama toko)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
-    /* (style sama seperti sebelumnya) */
     * {
       box-sizing: border-box;
     }
@@ -99,20 +98,67 @@
   </div>
 
   <script>
+    // Fungsi untuk set status dan simpan ke localStorage
+    function setStatus(status, message) {
+      const statusEl = document.getElementById("status");
+      const errorMessageEl = document.getElementById("error-message");
+      const loadingEl = document.getElementById("loading");
+
+      loadingEl.style.display = "none";
+      errorMessageEl.textContent = "";
+
+      if (status === "OK") {
+        statusEl.textContent = `✅ ${message}`;
+        statusEl.className = "status-success";
+      } else if (status === "DUPLICATE") {
+        statusEl.textContent = `⚠️ ${message}`;
+        statusEl.className = "status-warning";
+      } else if (status === "ERROR") {
+        statusEl.textContent = `❌ ${message}`;
+        statusEl.className = "status-error";
+        errorMessageEl.textContent = message;
+      } else {
+        statusEl.textContent = message;
+        statusEl.className = "";
+      }
+
+      // Simpan ke localStorage
+      localStorage.setItem("absenStatus", JSON.stringify({ status, message }));
+    }
+
+    // Fungsi untuk load status dari localStorage
+    function loadStatus() {
+      const saved = localStorage.getItem("absenStatus");
+      if (saved) {
+        try {
+          const obj = JSON.parse(saved);
+          setStatus(obj.status, obj.message);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    }
+
     window.onload = function () {
       const params = new URLSearchParams(window.location.search);
       const nama = params.get("nama") || "N/A";
       const barcode = params.get("barcode") || "N/A";
-      const token = params.get("token") || ""; // Ambil token dari URL parameter
+      const token = params.get("token") || "";
 
       const statusEl = document.getElementById("status");
       const loadingEl = document.getElementById("loading");
       const errorMessageEl = document.getElementById("error-message");
 
+      // Coba tampilkan status sebelumnya (jika ada)
+      if (loadStatus()) {
+        // Jika sudah ada status tersimpan, jangan kirim ulang
+        return;
+      }
+
       if (!navigator.geolocation) {
-        statusEl.innerHTML = "❌ Browser tidak mendukung lokasi.";
-        statusEl.className = "status-error";
-        errorMessageEl.textContent = "Gunakan browser yang mendukung geolocation seperti Chrome.";
+        setStatus("ERROR", "Browser tidak mendukung lokasi. Gunakan browser yang mendukung geolocation seperti Chrome.");
         return;
       }
 
@@ -136,6 +182,7 @@
           }
 
           statusEl.textContent = "⏳ Mengirim data absen...";
+
           fetch(url)
             .then((res) => {
               const contentType = res.headers.get("content-type") || "";
@@ -145,29 +192,15 @@
               return res.json();
             })
             .then((resp) => {
-              loadingEl.style.display = "none";
-              if (resp.status === "OK") {
-                statusEl.textContent = `✅ ${resp.message}`;
-                statusEl.className = "status-success";
-              } else if (resp.status === "DUPLICATE") {
-                statusEl.textContent = `⚠️ ${resp.message}`;
-                statusEl.className = "status-warning";
-              } else {
-                statusEl.textContent = `❌ ${resp.message}`;
-                statusEl.className = "status-error";
-              }
+              setStatus(resp.status, resp.message);
             })
             .catch((err) => {
-              loadingEl.style.display = "none";
               console.error("Fetch error:", err);
-              statusEl.textContent = "❌ Gagal mengirim absen. Silakan coba lagi.";
-              statusEl.className = "status-error";
+              setStatus("ERROR", "Gagal mengirim absen. Silakan coba lagi.");
             });
         },
         (err) => {
-          loadingEl.style.display = "none";
-          statusEl.textContent = `❌ Gagal ambil lokasi: ${err.message}`;
-          statusEl.className = "status-error";
+          setStatus("ERROR", `Gagal ambil lokasi: ${err.message}`);
         }
       );
     };
